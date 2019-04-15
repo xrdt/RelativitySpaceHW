@@ -16,18 +16,20 @@ from influxdb import InfluxDBClient
 from multiprocessing import Process
 from threading import Timer
 
-# single y_pos sensor is on
-sensor = True
-
 # set up influxDB
 client = InfluxDBClient(host='localhost', port=8086)
 client.create_database('robot_sim')
 client.switch_database('robot_sim')
 
+# yes, globals are ugly. they are still the easiest way to set up interprocess comms.
 global move
 global current_pos
 move = 0.
 current_pos = 0
+
+# single y_pos sensor is on
+sensor = True
+
 
 def generate_data(client):
     # incorporate control loop input
@@ -51,23 +53,29 @@ def generate_data(client):
                       "fields": {"cmd": move}}]
         client.write_points(json_body)
 
-
     move = 0
     Timer(.1, generate_data, [client]).start()
     
 
 def control_loop():
-    global move, current_pos
+    global move, current_pos, sensor
+
     # very simple control mechanism.
     move = 0.
 
-    # if current pos is negative, send a positive signal to partially correct
-    if current_pos < 0:
-        move = -.6 * current_pos
-    # if current pos is positive, send a negative signal to partially correct
-    elif current_pos > 0:
-        move = -.6 * current_pos
-    else:
+    if sensor: 
+        # if current pos is negative, send a positive signal to partially correct
+        if current_pos < 0:
+            move = -.6 * current_pos
+        # if current pos is positive, send a negative signal to partially correct
+        elif current_pos > 0:
+            move = -.6 * current_pos
+
+        else:
+            move = 0.
+    else: 
+        # I know, not exactly turning the sensor off, but achieves same result...for now
+        # Let's just not do anything since we don't know what the state of the world is.
         move = 0.
 
     Timer(1, control_loop).start()
@@ -87,6 +95,7 @@ def gui_window(window, button):
         window.update()
         window.update_idletasks()
 
+
 if __name__ == '__main__':
     # Start the sensor gui
     sensor_window = tkinter.Tk()
@@ -102,4 +111,3 @@ if __name__ == '__main__':
     p2.run()
     p3 = Process(target=gui_window, args=(sensor_window, button))
     p3.run()
-
