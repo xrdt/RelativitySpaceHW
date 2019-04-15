@@ -29,7 +29,7 @@ Click this button and you will see the results in Grafana.
 
 ## Design Diagram
 
-![design diagram](design.png?raw=true)
+![design diagram](diagram.png)
 
 
 ## Where this repository needs improvement
