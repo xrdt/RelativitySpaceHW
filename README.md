@@ -29,4 +29,25 @@ Click this button and you will see the results in Grafana.
 
 ## Design Diagram
 
-![design diagram](design.jpg)
+![design diagram](design.png)
+
+
+## Where this repository needs improvement
+
+* Threading and multiprocessing without global variables. That, is processes should talk to each 
+other like adults, without using global variables. 
+* Sensor redundancy. Surely you wouldn't build a system like this without sensor redundancy? At 
+the very least add in a piezo electric sensor for contact detection or some encoders on the 
+joints or a proximity sensor or a vibration sensor so you'd have multiple ways to know if you're 
+welding at the right spot or not. 
+* Kalman Filtering. This isn't so essential with a simple system like this but what if the 
+sensors are actually noisy and like spewing crazy data? Well, you'd want to take that into 
+account so you can get the real picture. 
+* Smarter control loop. The only other control mechanism I know of is PID loops, so I'd 
+suggest implementing one of those, but maybe that's not what we want here. 
+* Smarter sensor shutdown. I've currently implemented it such that the control loop just ignores 
+the sensor data if the sensors are down. That's not entirely correct, but there were some 
+details that I wasn't sure about so I just left it at that.  
+
+These are just a couple of ideas for major improvements to the system. I'm sure there's other 
+things that could be tweaked in this code. 
