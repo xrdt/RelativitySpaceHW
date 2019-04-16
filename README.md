@@ -14,8 +14,16 @@ Ensure you have the following python modules installed:
 tkinter
 InfluxDBClient
 
-Set up Grafana to read from InfluxDB, with database 'robot\_sim"
+Start InfluxDB instance: 
+influxd
 
+Start the Grafana server: systemctl start grafana-server
+Log in using default username/password: admin / admin 
+Set up Grafana to read from InfluxDB, with database 'robot\_sim"
+Create a new dashboard. 
+Create the following queries: 
+select pos from y\_pos
+select cmd from y\_move\_cmd
 
 ## Running Instructions
 
