@@ -17,13 +17,16 @@ InfluxDBClient
 Start InfluxDB instance: 
 influxd
 
-Start the Grafana server: systemctl start grafana-server
-Log in using default username/password: admin / admin 
-Set up Grafana to read from InfluxDB, with database 'robot\_sim"
-Create a new dashboard. 
-Create the following queries: 
-select pos from y\_pos
-select cmd from y\_move\_cmd
+Start the Grafana server: systemctl start grafana-server<br>
+Log in using default username/password: admin / admin <br>
+Set up Grafana to read from InfluxDB, with database 'robot\_sim"<br>
+Create a new dashboard. <br><br>
+Create the following queries: <br>
+select pos from y\_pos<br>
+select cmd from y\_move\_cmd<br>
+
+Click the dropdown at the bottom of the query to change to "table" mode. <br>
+Also go to the visualization tab in the far left and change from "graph" to "table".
 
 ## Running Instructions
 
