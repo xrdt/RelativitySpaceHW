@@ -37,11 +37,16 @@ Type 'python3 hw.py' into your terminal.
 You should see a window pop up with a button to start / stop the sensors. 
 Click this button and you will see the results in Grafana. 
 
+Results should look as follows: 
+![results\_example](screenshot_1.png)
 
 ## Design Diagram
 
 ![design diagram](diagram.png)
 
+    
+## Example data
+I have uploaded example data with the sensor always on as "dashboard\_sensor\_always\_on.json". 
 
 ## Where this repository needs improvement
 
