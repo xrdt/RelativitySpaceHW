@@ -7,6 +7,7 @@ Description: Write a simulator for a robotic welder that includes a closed loop 
              some sensors, and a GUI for turning on an off sensors.
 '''
 
+import sockets
 import numpy as np
 import datetime
 import random
@@ -16,14 +17,6 @@ from influxdb import InfluxDBClient
 from multiprocessing import Process
 from threading import Timer
 
-# set up influxDB
-client = InfluxDBClient(host='localhost', port=8086)
-client.create_database('robot_sim')
-client.switch_database('robot_sim')
-
-# yes, globals are ugly. they are still the easiest way to set up interprocess comms.
-global move
-global current_pos
 move = 0.
 current_pos = 0
 
@@ -33,8 +26,6 @@ sensor = True
 
 def generate_data(client):
     # incorporate control loop input
-    global current_pos
-    global move
     current_pos = move + current_pos 
 
     current_time = datetime.datetime.now()
@@ -54,32 +45,9 @@ def generate_data(client):
         client.write_points(json_body)
 
     move = 0
-    Timer(.1, generate_data, [client]).start()
+    # 2 Hz
+    Timer(.5, generate_data, [client]).start()
     
-
-def control_loop():
-    global move, current_pos, sensor
-
-    # very simple control mechanism.
-    move = 0.
-
-    if sensor: 
-        # if current pos is negative, send a positive signal to partially correct
-        if current_pos < 0:
-            move = -.6 * current_pos
-        # if current pos is positive, send a negative signal to partially correct
-        elif current_pos > 0:
-            move = -.6 * current_pos
-
-        else:
-            move = 0.
-    else: 
-        # I know, not exactly turning the sensor off, but achieves same result...for now
-        # Let's just not do anything since we don't know what the state of the world is.
-        move = 0.
-
-    Timer(1, control_loop).start()
-
 
 def sensor_switch(button):
     global sensor
@@ -96,6 +64,9 @@ def gui_window(window, button):
         window.update_idletasks()
 
 
+HOST = '127.0.0.1'
+PORT = 65432
+
 if __name__ == '__main__':
     # Start the sensor gui
     sensor_window = tkinter.Tk()
@@ -105,9 +76,24 @@ if __name__ == '__main__':
     button['command'] = lambda: sensor_switch(button)
     button.pack()
 
+    # set up influxDB
+    client = InfluxDBClient(host='localhost', port=8086)
+    client.create_database('robot_sim')
+    client.switch_database('robot_sim')
+
+    # open up the server socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((HOST, PORT))
+        s.listen()
+        conn, addr = s.accept()
+        with conn:
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                conn.sendall(data)
+
     p1 = Process(target=generate_data, args=(client,))
     p1.run()
-    p2 = Process(target=control_loop)
-    p2.run()
     p3 = Process(target=gui_window, args=(sensor_window, button))
     p3.run()
